@@ -1,7 +1,11 @@
 package ro.pub.cs.systems.pdsd.lab06.ftpserverwelcomemessage.views;
 
+import java.io.BufferedReader;
+import java.net.Socket;
+
 import ro.pub.cs.systems.pdsd.lab06.ftpserverwelcomemessage.R;
 import ro.pub.cs.systems.pdsd.lab06.ftpserverwelcomemessage.general.Constants;
+import ro.pub.cs.systems.pdsd.lab06.ftpserverwelcomemessage.general.Utilities;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +20,7 @@ public class FTPServerWelcomeMessageActivity extends Activity {
 	
 	private EditText FTPServerAddressEditText;
 	private TextView welcomeMessageTextView;
+	public String line;
 	
 	protected class FTPServerCommunicationThread extends Thread {
 		
@@ -32,6 +37,30 @@ public class FTPServerWelcomeMessageActivity extends Activity {
 				// - the value does not start with Constants.FTP_MULTILINE_START_CODE2
 				// append the line to the welcomeMessageTextView text view content (on the UI thread!!!)
 				// close the socket
+				
+				Socket socket = new Socket(FTPServerAddressEditText.getText().toString(), 21);
+				BufferedReader br = Utilities.getReader(socket);
+				line = br.readLine();
+				if(line.startsWith(Constants.FTP_MULTILINE_START_CODE))
+				{
+					while((line = br.readLine()) != null)
+					{
+						if(line.startsWith(Constants.FTP_MULTILINE_END_CODE1) || line.startsWith(Constants.FTP_MULTILINE_END_CODE2))
+							break;
+						
+						final String finalizedLine = line;
+						welcomeMessageTextView.post(new Runnable() {
+							
+							@Override
+							public void run() {
+								welcomeMessageTextView.append(finalizedLine + "\n");
+								
+							}
+						});
+						
+					}
+				}
+				socket.close();
 
 			} catch (Exception exception) {
 				Log.e(Constants.TAG, "An exception has occurred: "+exception.getMessage());

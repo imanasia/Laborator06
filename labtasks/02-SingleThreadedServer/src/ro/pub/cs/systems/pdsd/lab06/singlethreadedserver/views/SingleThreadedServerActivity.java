@@ -24,6 +24,31 @@ public class SingleThreadedServerActivity extends Activity {
 	private ServerThread singleThreadedServer;
 	
 	private ServerTextContentWatcher serverTextContentWatcher = new ServerTextContentWatcher();
+	private class MyThread extends Thread{
+		private Socket socket;
+		
+		 public MyThread(Socket sk){
+			 socket = sk;
+		 }
+		@Override
+		public void run()
+		{
+			PrintWriter printWriter;
+			try {
+				Thread.sleep(3000);
+				printWriter = Utilities.getWriter(socket);
+				printWriter.println(serverTextEditText.getText().toString());
+				socket.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+	}
 	private class ServerTextContentWatcher implements TextWatcher {
 
 		@Override
@@ -88,10 +113,10 @@ public class SingleThreadedServerActivity extends Activity {
 				serverSocket = new ServerSocket(Constants.SERVER_PORT);
 				while (isRunning) {
 					Socket socket = serverSocket.accept();
-					Log.v(Constants.TAG, "Connection opened with "+socket.getInetAddress()+":"+socket.getLocalPort());
-					PrintWriter printWriter = Utilities.getWriter(socket);
-					printWriter.println(serverTextEditText.getText().toString());
-					socket.close();
+					Log.v(Constants.TAG, "Connection opened with "+socket.getInetAddress()+":"+socket.getLocalPort());					
+					MyThread t = new MyThread(socket);
+					t.start();	
+				
 					Log.v(Constants.TAG, "Connection closed");
 				}
 			} catch (IOException ioException) {

@@ -1,0 +1,15 @@
+package ro.pub.cs.systems.pdsd.lab06.singlethreadedserver.views;
+
+import java.io.PrintWriter;
+
+import ro.pub.cs.systems.pdsd.lab06.singlethreadedserver.general.Utilities;
+
+public class MyThread extends Thread{
+
+	@Override
+	public void run()
+	{
+		PrintWriter printWriter = Utilities.getWriter(socket);
+		printWriter.println(serverTextEditText.getText().toString());
+	}
+}

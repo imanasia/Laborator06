@@ -1,0 +1,5 @@
+package ro.pub.cs.systems.pdsd.lab06.singlethreadedserver.views;
+
+public class MyThread extends Therad{
+
+}
